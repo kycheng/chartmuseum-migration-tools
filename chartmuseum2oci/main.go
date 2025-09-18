@@ -51,6 +51,8 @@ var (
 	harborHost        string                //nolint:gochecknoglobals
 	destPath          string                //nolint:gochecknoglobals
 	projectsToMigrate ProjectsToMigrateList //nolint:gochecknoglobals
+
+	helmInsecure bool //nolint:gochecknoglobals
 )
 
 func init() { //nolint:gochecknoinits
@@ -65,6 +67,7 @@ func initFlags() {
 	flag.StringVar(&harborPassword, "password", "", "Harbor registry password")
 	flag.StringVar(&destPath, "destpath", "", "Destination subpath")
 	flag.Var(&projectsToMigrate, "project", "Name of the project(s) to migrate")
+	flag.BoolVar(&helmInsecure, "insecure", false, "allow Helm registry login and push charts without certs")
 	flag.Parse()
 
 	if harborURL == "" {
@@ -141,7 +144,12 @@ func main() {
 }
 
 func helmLogin() error {
-	cmd := exec.Command(helmBinaryPath, "registry", "login", "--username", harborUsername, "--password", harborPassword, harborURL) //nolint:lll
+	params := []string{"registry", "login", "--username", harborUsername, "--password", harborPassword, harborURL}
+	if helmInsecure {
+		params = append(params, "--insecure")
+	}
+
+	cmd := exec.Command(helmBinaryPath, params...) //nolint:gosec
 
 	var stdErr bytes.Buffer
 	cmd.Stderr = &stdErr
@@ -275,7 +283,13 @@ func pullChartFromChartmuseum(helmChart HelmChart) error {
 
 func pushChartToOCI(helmChart HelmChart) error {
 	repoURL := fmt.Sprintf("oci://%s/%s%s", harborHost, helmChart.Project, destPath)
-	cmd := exec.Command(helmBinaryPath, "push", helmChart.ChartFileName(), repoURL) //nolint:gosec
+	params := []string{"push", helmChart.ChartFileName(), repoURL}
+	if helmInsecure {
+		params = append(params, "--insecure-skip-tls-verify=false")
+	}
+
+	fmt.Println(params)
+	cmd := exec.Command(helmBinaryPath, params...) //nolint:gosec
 
 	var stdErr bytes.Buffer
 	cmd.Stderr = &stdErr
