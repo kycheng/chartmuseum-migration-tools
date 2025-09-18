@@ -41,3 +41,11 @@ In this example, the charts will be pushed into `$HARBOR_URL/$PROJECT/charts`:
 ```bash
 docker run -ti --rm goharbor/chartmuseum2oci --url $HARBOR_URL --username $HARBOR_USER --password $HARBOR_PASSWORD --destpath /charts
 ```
+
+### Insecure Harbor
+
+Using the option `--insecure` allows Helm registry login and push charts without certificates verification. This is useful when working with self-signed certificates or insecure Harbor instances.
+
+```bash
+docker run -ti --rm goharbor/chartmuseum2oci --url $HARBOR_URL --username $HARBOR_USER --password $HARBOR_PASSWORD --insecure
+```
