@@ -2,14 +2,21 @@ FROM golang:1.20 AS builder
 
 WORKDIR /root/src
 
+# Set build arguments for multi-arch support
+ARG TARGETOS=linux
+ARG TARGETARCH
+
 ENV CGO_ENABLED=0 \
     GO111MODULE=on \
-    GOOS="linux"
+    GOOS=${TARGETOS} \
+    GOARCH=${TARGETARCH}
 
 COPY go.mod go.sum ./
 COPY main.go ./
 
+# Build the binary with proper architecture targeting
 RUN go build -a \
+    -ldflags="-w -s" \
     -o /go/bin/chartmuseum2oci \
     main.go
 
@@ -31,6 +38,7 @@ RUN if [ -z "$TARGETARCH" ]; then \
         esac; \
     fi
 
+# Download and install Helm for the target architecture
 RUN wget -q https://get.helm.sh/helm-${HELM_VERSION}-linux-${TARGETARCH}.tar.gz -O - \
     | tar -xzO linux-${TARGETARCH}/helm > /bin/helm && \
     chmod +x /bin/helm
