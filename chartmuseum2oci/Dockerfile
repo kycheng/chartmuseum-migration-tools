@@ -36,10 +36,8 @@ RUN if [ -z "$TARGETARCH" ]; then \
             armv7l) TARGETARCH=arm ;; \
             *) echo "Unsupported architecture: $ARCH" && exit 1 ;; \
         esac; \
-    fi
-
-# Download and install Helm for the target architecture
-RUN wget -q https://get.helm.sh/helm-${HELM_VERSION}-linux-${TARGETARCH}.tar.gz -O - \
+    fi \
+    && wget -q https://get.helm.sh/helm-${HELM_VERSION}-linux-${TARGETARCH}.tar.gz -O - \
     | tar -xzO linux-${TARGETARCH}/helm > /bin/helm && \
     chmod +x /bin/helm
 

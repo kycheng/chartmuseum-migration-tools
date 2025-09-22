@@ -42,10 +42,25 @@ In this example, the charts will be pushed into `$HARBOR_URL/$PROJECT/charts`:
 docker run -ti --rm goharbor/chartmuseum2oci --url $HARBOR_URL --username $HARBOR_USER --password $HARBOR_PASSWORD --destpath /charts
 ```
 
-### Insecure Harbor
+### Security options
 
-Using the option `--insecure` allows Helm registry login and push charts without certificates verification. This is useful when working with self-signed certificates or insecure Harbor instances.
+#### Insecure TLS verification
+
+Using the option `--insecure` to skip TLS verification for helm operations. This is useful when working with self-signed certificates or internal registries.
 
 ```bash
 docker run -ti --rm goharbor/chartmuseum2oci --url $HARBOR_URL --username $HARBOR_USER --password $HARBOR_PASSWORD --insecure
+```
+
+#### Plain HTTP
+
+Using the option `--plain-http` to use plain HTTP instead of HTTPS for helm operations. This should only be used in secure internal networks.
+
+```bash
+docker run -ti --rm goharbor/chartmuseum2oci --url $HARBOR_URL --username $HARBOR_USER --password $HARBOR_PASSWORD --plain-http
+```
+
+Both security options can be combined:
+```bash
+docker run -ti --rm goharbor/chartmuseum2oci --url $HARBOR_URL --username $HARBOR_USER --password $HARBOR_PASSWORD --insecure --plain-http
 ```
